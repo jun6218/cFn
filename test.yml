@@ -1,0 +1,251 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creating ECS service
+Parameters:
+  AppName:
+    Type: String
+    Description: Name of app requiring ELB exposure
+    Default: simple-app
+  AppContainerPort:
+    Type: Number
+    Description: Container port of app requiring ELB exposure
+    Default: '80'
+  AppHostPort:
+    Type: Number
+    Description: Host port of app requiring ELB exposure
+    Default: '80'
+  ServiceName:
+    Type: String
+  LoadBalancerName:
+    Type: String
+  HealthCheckGracePeriodSeconds:
+    Type: String
+Resources:
+  cluster:
+    Type: 'AWS::ECS::Cluster'
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: fd73ffc6-b585-479f-a70b-0b7ec2fde6ff
+  taskdefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      ContainerDefinitions:
+        - Name: !Ref AppName
+          MountPoints:
+            - SourceVolume: my-vol
+              ContainerPath: /var/www/my-vol
+          Image: amazon/amazon-ecs-sample
+          Cpu: '10'
+          PortMappings:
+            - ContainerPort: !Ref AppContainerPort
+              HostPort: !Ref AppHostPort
+          EntryPoint:
+            - /usr/sbin/apache2
+            - '-D'
+            - FOREGROUND
+          Memory: '500'
+          Essential: true
+        - Name: busybox
+          Image: busybox
+          Cpu: '10'
+          EntryPoint:
+            - sh
+            - '-c'
+          Memory: '500'
+          Command:
+            - >-
+              /bin/sh -c "while true; do /bin/date > /var/www/my-vol/date; sleep
+              1; done"
+          Essential: false
+          VolumesFrom:
+            - SourceContainer: !Ref AppName
+      Volumes:
+        - Host:
+            SourcePath: /var/lib/docker/vfs/dir/
+          Name: my-vol
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: a4016f63-2508-479d-9aca-252f3c6ca48e
+  service:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref cluster
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DesiredCount: 0
+      HealthCheckGracePeriodSeconds: !Ref HealthCheckGracePeriodSeconds
+      LoadBalancers:
+        - ContainerName: !Ref AppName
+          ContainerPort: !Ref AppContainerPort
+          LoadBalancerName: !Ref elb
+      PlacementStrategies:
+        - Type: binpack
+          Field: memory
+        - Type: spread
+          Field: host
+      PlacementConstraints:
+        - Type: memberOf
+          Expression: 'attribute:ecs.availability-zone != us-east-1d'
+        - Type: distinctInstance
+      TaskDefinition: !Ref taskdefinition
+      ServiceName: !Ref ServiceName
+      Role: !Ref Role
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 9542966d-0442-4cc8-a81a-f85323d66d4f
+  elb:
+    Type: 'AWS::ElasticLoadBalancing::LoadBalancer'
+    Properties:
+      LoadBalancerName: !Ref LoadBalancerName
+      Listeners:
+        - InstancePort: !Ref AppHostPort
+          LoadBalancerPort: '80'
+          Protocol: HTTP
+      Subnets:
+        - !Ref Subnet1
+    DependsOn: GatewayAttachment
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 49b681eb-74db-43d0-b684-f43288074532
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.0.0.0/24
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 9af90cfc-812f-4b63-be7a-c1535e646668
+  Subnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.0.0/25
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 70fc3d41-4138-4ea5-846b-fea25e0cf780
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 7e68d1c9-7171-44ff-b7b6-84449382d903
+  GatewayAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 0ce1bfd6-6147-45e1-a433-a2a56c3e5d59
+  Role:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2008-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: ecs.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole'
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 7453c3d1-7ba0-4de6-9997-1d5b95811d42
+Outputs:
+  Cluster:
+    Value: !Ref cluster
+Metadata:
+  'AWS::CloudFormation::Designer':
+    7453c3d1-7ba0-4de6-9997-1d5b95811d42:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 540
+        'y': 90
+      z: 1
+      embeds: []
+    7e68d1c9-7171-44ff-b7b6-84449382d903:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 540
+        'y': 210
+      z: 1
+      embeds: []
+    9af90cfc-812f-4b63-be7a-c1535e646668:
+      size:
+        width: 420
+        height: 420
+      position:
+        x: 60
+        'y': 90
+      z: 1
+      embeds:
+        - 70fc3d41-4138-4ea5-846b-fea25e0cf780
+    0ce1bfd6-6147-45e1-a433-a2a56c3e5d59:
+      source:
+        id: 9af90cfc-812f-4b63-be7a-c1535e646668
+      target:
+        id: 7e68d1c9-7171-44ff-b7b6-84449382d903
+      z: 1
+    70fc3d41-4138-4ea5-846b-fea25e0cf780:
+      size:
+        width: 240
+        height: 240
+      position:
+        x: 90
+        'y': 150
+      z: 2
+      parent: 9af90cfc-812f-4b63-be7a-c1535e646668
+      embeds:
+        - 49b681eb-74db-43d0-b684-f43288074532
+      iscontainedinside:
+        - 9af90cfc-812f-4b63-be7a-c1535e646668
+        - 9af90cfc-812f-4b63-be7a-c1535e646668
+    49b681eb-74db-43d0-b684-f43288074532:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 120
+        'y': 210
+      z: 3
+      parent: 70fc3d41-4138-4ea5-846b-fea25e0cf780
+      embeds: []
+      iscontainedinside:
+        - 70fc3d41-4138-4ea5-846b-fea25e0cf780
+        - 70fc3d41-4138-4ea5-846b-fea25e0cf780
+      dependson:
+        - 0ce1bfd6-6147-45e1-a433-a2a56c3e5d59
+    a4016f63-2508-479d-9aca-252f3c6ca48e:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 540
+        'y': 330
+      z: 1
+      embeds: []
+    fd73ffc6-b585-479f-a70b-0b7ec2fde6ff:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 540
+        'y': 450
+      z: 1
+      embeds: []
+    9542966d-0442-4cc8-a81a-f85323d66d4f:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 60
+        'y': 570
+      z: 1
+      embeds: []
+
+
+
