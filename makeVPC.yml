@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create VPC
+ 
+#入力用パラメータ
+Parameters: 
+   VpcName:
+     Description: Name of VPC　
+     Type: String
+     Default: sample-vpc
+   CiderBlock:
+     Description: CiderBlock 
+     Type: Number
+     Default: 10.0.0.0/16
+     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+Resources: 
+   myVPC:
+     Type: AWS::EC2::VPC
+     Properties:
+       CidrBlock: !Ref CiderBlock
+       EnableDnsSupport: true
+       Tags:
+         - Key: Name
+           Value: VPC
+Outputs:
+   VPC:
+    Description: VPCID of the newly created VPC
+    value: !Ref VpcName
+    Export:
+     Name: !Ref VPCID
