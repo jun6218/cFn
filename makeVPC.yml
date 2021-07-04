@@ -1,29 +1,30 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Create VPC
- 
+#https://dev.classmethod.jp/articles/list-of-cloudformation-parameters-by-data-type/ 
 #入力用パラメータ
 Parameters: 
    VpcName:
-     Description: Name of VPC　
+     Description: Name of VPC
      Type: String
      Default: sample-vpc
-   CiderBlock:
-     Description: CiderBlock 
-     Type: Number
+   CiderBlockName:
+     Type: String
      Default: 10.0.0.0/16
-     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+#リソースの記述
 Resources: 
    myVPC:
      Type: AWS::EC2::VPC
      Properties:
-       CidrBlock: !Ref CiderBlock
+       CidrBlock: 
+        Ref: CiderBlockName
        EnableDnsSupport: true
        Tags:
          - Key: Name
-           Value: VPC
+           Value: !Ref VpcName
+#出力名
 Outputs:
-   VPC:
-    Description: VPCID of the newly created VPC
-    value: !Ref VpcName
-    Export:
-     Name: !Ref VPCID
+    VPCout:
+      Description: vpcID
+      Value: !Ref myVPC
+      Export: 
+        Name: vpcID

@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: make subnet
+
+Parameters: 
+      subName1:
+        Description: az of subnet
+        Type: AWS::EC2::AvailabilityZone::Name
+      subName2:
+        Description: az of subnet
+        Type: AWS::EC2::AvailabilityZone::Name
+      subName3:
+        Description: az of subnet
+        Type: AWS::EC2::AvailabilityZone::Name
+      subName4:
+        Description: az of subnet
+        Type: AWS::EC2::AvailabilityZone::Name
+      CiderBlockName1:
+        Type: String
+        Default: 10.0.0.0/20
+      CiderBlockName2:
+        Type: String
+        Default: 10.0.16.0/20
+      CiderBlockName3:
+        Type: String
+        Default: 10.0.64.0/20
+      CiderBlockName4:
+        Type: String
+        Default: 10.0.80.0/20
+Resources: 
+    subnetName1:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: !Ref subName1
+        VpcId: !ImportValue vpcID
+        CidrBlock: !Ref CiderBlockName1
+        Tags:
+          - Key: Name
+            Value: sample-subnet-public01
+    subnetName2:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: !Ref subName2
+        VpcId: !ImportValue vpcID
+        CidrBlock: !Ref CiderBlockName2
+        Tags:
+          - Key: Name
+            Value: sample-subnet-public02
+    subnetName3:
+      Type: AWS::EC2::Subnet
+      Properties:
+         AvailabilityZone: !Ref subName3
+         VpcId: !ImportValue vpcID
+         CidrBlock: !Ref CiderBlockName3
+         Tags:
+          - Key: Name
+            Value: sample-subnet-private01
+    subnetName4:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: !Ref subName4
+        VpcId: !ImportValue vpcID
+        CidrBlock: !Ref CiderBlockName4
+        Tags:
+          - Key: Name
+            Value: sample-subnet-private02
