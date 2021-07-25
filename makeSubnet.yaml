@@ -48,10 +48,10 @@ Resources:
     subnetName3:
       Type: AWS::EC2::Subnet
       Properties:
-         AvailabilityZone: !Ref subName3
-         VpcId: !ImportValue vpcID
-         CidrBlock: !Ref CiderBlockName3
-         Tags:
+        AvailabilityZone: !Ref subName3
+        VpcId: !ImportValue vpcID
+        CidrBlock: !Ref CiderBlockName3
+        Tags:
           - Key: Name
             Value: sample-subnet-private01
     subnetName4:
@@ -63,3 +63,15 @@ Resources:
         Tags:
           - Key: Name
             Value: sample-subnet-private02
+#インターネットゲートウェイを追加
+    sampleIgw:
+      Type: AWS::EC2::InternetGateway
+      Properties:
+        Tags:
+          - Key: Name
+            Value: sample-igw
+    AttachGateway:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+        VpcId: !ImportValue vpcID
+        InternetGatewayId: !Ref sampleIgw
