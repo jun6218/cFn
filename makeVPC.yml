@@ -3,24 +3,24 @@ Description: Create VPC
 #https://dev.classmethod.jp/articles/list-of-cloudformation-parameters-by-data-type/ 
 #入力用パラメータ
 Parameters: 
-   VpcName:
-     Description: Name of VPC
-     Type: String
-     Default: sample-vpc
-   CiderBlockName:
-     Type: String
-     Default: 10.0.0.0/16
+    VpcName:
+      Description: Name of VPC
+      Type: String
+      Default: sample-vpc
+    CiderBlockName:
+      Type: String
+      Default: 10.0.0.0/16
 #リソースの記述
 Resources: 
-   myVPC:
-     Type: AWS::EC2::VPC
-     Properties:
-       CidrBlock: 
+    myVPC:
+      Type: AWS::EC2::VPC
+      Properties:
+        CidrBlock: 
         Ref: CiderBlockName
-       EnableDnsSupport: true
-       Tags:
-         - Key: Name
-           Value: !Ref VpcName
+        EnableDnsSupport: true
+        Tags:
+          - Key: Name
+            Value: !Ref VpcName
 #出力名
 Outputs:
     VPCout:

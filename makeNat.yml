@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: make nat gatway
+Parameters: 
+      sampleNgw01:
+        Description: name of nat-gatgatway01
+        Type: String
+        Default: sample-ngw-01
+      sampleNgw02:
+        Description: name of nat-gatgatway02
+        Type: String
+        Default: sample-ngw-02
+Resources: 
+      epiNgw01:
+        Type: AWS::EC2::EIP
+        Properties:
+          Domain: vpc
+      epiNgw02:
+        Type: AWS::EC2::EIP
+        Properties:
+          Domain: vpc
+      Ngw01:
+        Type: AWS::EC2::NatGateway
+        Properties:
+          AllocationId: !GetAtt epiNgw01.AllocationId
+          SubnetId: !ImportValue subnet01 # Required
+          Tags:
+              - Key: Name
+                Value: sample-ngw-01
+      Ngw02:
+        Type: AWS::EC2::NatGateway
+        Properties:
+          AllocationId: !GetAtt epiNgw02.AllocationId
+          SubnetId: !ImportValue subnet02 # Required
+          Tags:
+              - Key: Name
+                Value: sample-ngw-02

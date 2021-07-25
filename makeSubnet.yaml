@@ -75,3 +75,15 @@ Resources:
       Properties:
         VpcId: !ImportValue vpcID
         InternetGatewayId: !Ref sampleIgw
+Outputs:
+    subnetOut01:
+      Description: output of subnet public01
+      Value: !Ref subnetName1
+      Export: 
+        Name: subnet01
+    subnetOut02:
+      Description: output of subnet public02
+      Value: !Ref subnetName2
+      Export: 
+        Name: subnet02
+
