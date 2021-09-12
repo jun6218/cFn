@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Make routeTable
+Parameters: 
+      subName1:
+        Description: name of rtb public
+        Type: String
+      subName2:
+        Description: name of rtb private01
+        Type: String
+      subName3:
+        Description: name of rtb private02
+        Type: String
+
+Resources: 
+##################################
+#
+#
+#
+##################################
+  publicRtb:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: vpcID
+      Tags:
+        - Key: Name
+          Value: sample-rt-public
+  routeName:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref publicRtb
+      DestinationCidrBlock: 10.0.0.0/16
+      GatewayId: !ImportValue eip-ngw-01
+
+  publicRtb01:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: vpcID
+      Tags:
+        - Key: Name
+          Value: sample-rt-public
+  routeName01:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref publicRtb
+      DestinationCidrBlock: 10.0.0.0/16
+      GatewayId: !ImportValue eip-ngw-01
+Outputs:
